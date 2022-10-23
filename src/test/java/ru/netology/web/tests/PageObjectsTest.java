@@ -1,71 +1,54 @@
 package ru.netology.web.tests;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.netology.web.data.DataHelper;
-import ru.netology.web.page.DashboardPage;
 import ru.netology.web.page.LoginPage;
 
-import static com.codeborne.selenide.Selenide.*;
+import static com.codeborne.selenide.Selenide.open;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PageObjectsTest {
-    int Balance1;
-    int Balance2;
-    int endBalance1;
-    int endBalance2;
-    int sum;
-    DashboardPage dashboardPage;
 
-    @BeforeEach
-    void setup() {
+    @Test
+    void shouldTransferMoneyFromFirstToSecondCard() {
         var loginPage = open("http://localhost:9999", LoginPage.class);
         var authInfo = DataHelper.getAuthInfo();
         var verificationPage = loginPage.validLogin(authInfo);
         var verificationCode = DataHelper.getVerificationCode(authInfo);
-        dashboardPage = verificationPage.validVerify(verificationCode);
-        Balance1 = dashboardPage.extractBalance((dashboardPage.card1));
-        Balance2 = dashboardPage.extractBalance((dashboardPage.card2));
+        var dashboardPage = verificationPage.validVerify(verificationCode);
+        var firstCardInfo = DataHelper.getFirstCard();
+        var secondCardInfo = DataHelper.getSecondCard();
+        var firstCardBalance = dashboardPage.getCardBalance(firstCardInfo);
+        var secondCardBalance = dashboardPage.getCardBalance(secondCardInfo);
+        var amount = DataHelper.generateValidAmount(firstCardBalance);
+        var expectedBalanceFirstCard = firstCardBalance - amount;
+        var expectedBalanceSecondCard = secondCardBalance + amount;
+        var moneyTransferPage = dashboardPage.selectCardToTransfer(secondCardInfo);
+        dashboardPage = moneyTransferPage.makeValidTransfer(String.valueOf(amount), firstCardInfo);
+        var actualBalanceFirstCard = dashboardPage.getCardBalance(firstCardInfo);
+        var actualBalanceSecondCard = dashboardPage.getCardBalance(secondCardInfo);
+        assertEquals(expectedBalanceFirstCard, actualBalanceFirstCard);
+        assertEquals(expectedBalanceSecondCard, actualBalanceSecondCard);
     }
 
-    @Test
-    @DisplayName("Перевод денег с первой карты на вторую")
-    void shouldTransferMoneyFromFirstToSecondCard() {
-        sum = 100;
-        var MoneyTransferPage = dashboardPage.clickButton2(dashboardPage.card2);
-        var cardNum = DataHelper.getFirstCard().getCardNumber();
-        var dashboardPage2 = MoneyTransferPage.decision(Integer.toString(sum), cardNum);
-        endBalance1 = dashboardPage2.extractBalance((dashboardPage2.card1));
-        endBalance2 = dashboardPage2.extractBalance((dashboardPage2.card2));
-        assertEquals(Balance1 - sum, endBalance1);
-        assertEquals(Balance2 + sum, endBalance2);
-    }
-
-    @Test
-    @DisplayName("Перевод денег сo второй карты на первую")
-    void shouldTransferMoneyFromSecondToFirstCard() {
-        sum = 100;
-        var MoneyTransferPage = dashboardPage.clickButton1(dashboardPage.card1);
-        var cardNum = DataHelper.getSecondCard().getCardNumber();
-        var dashboardPage2 = MoneyTransferPage.decision(Integer.toString(sum), cardNum);
-        endBalance1 = dashboardPage2.extractBalance((dashboardPage2.card1));
-        endBalance2 = dashboardPage2.extractBalance((dashboardPage2.card2));
-        assertEquals(Balance1 + sum, endBalance1);
-        assertEquals(Balance2 - sum, endBalance2);
-    }
-
-    @Test
-    @DisplayName("Не должен переводить больше, чем есть на карте")
-    void shouldNotTransferMoreThanAvailable() {
-        sum = Balance1 + 100;
-        var MoneyTransferPage = dashboardPage.clickButton2(dashboardPage.card2);
-        var cardNum = DataHelper.getFirstCard().getCardNumber();
-        var dashboardPage2 = MoneyTransferPage.decision(Integer.toString(sum), cardNum);
-        endBalance1 = dashboardPage2.extractBalance((dashboardPage2.card1));
-        endBalance2 = dashboardPage2.extractBalance((dashboardPage2.card2));
-        assertEquals(Balance1 + sum, endBalance1);
-        assertEquals(Balance2 - sum, endBalance2);
+        @Test
+    void shouldGetErrorMessageIfAmountMoreBalance() {
+        var loginPage = open("http://localhost:9999", LoginPage.class);
+        var authInfo = DataHelper.getAuthInfo();
+        var verificationPage = loginPage.validLogin(authInfo);
+        var verificationCode = DataHelper.getVerificationCode(authInfo);
+        var dashboardPage = verificationPage.validVerify(verificationCode);
+        var firstCardInfo = DataHelper.getFirstCard();
+        var secondCardInfo = DataHelper.getSecondCard();
+        var firstCardBalance = dashboardPage.getCardBalance(firstCardInfo);
+        var secondCardBalance = dashboardPage.getCardBalance(secondCardInfo);
+        var amount = DataHelper.generateInvalidAmount(secondCardBalance);
+        var moneyTransferPage = dashboardPage.selectCardToTransfer(firstCardInfo);
+        moneyTransferPage.makeTransfer(String.valueOf(amount), secondCardInfo);
+        moneyTransferPage.findErrorMessage("Ошибка!");
+        var actualBalanceFirstCard = dashboardPage.getCardBalance(firstCardInfo);
+        var actualBalanceSecondCard = dashboardPage.getCardBalance(secondCardInfo);
+        assertEquals(firstCardBalance, actualBalanceFirstCard);
+        assertEquals(secondCardBalance, actualBalanceSecondCard);
     }
 }
-

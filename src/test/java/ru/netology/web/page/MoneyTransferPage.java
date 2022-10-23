@@ -1,24 +1,36 @@
 package ru.netology.web.page;
 
 import com.codeborne.selenide.SelenideElement;
-import org.openqa.selenium.Keys;
+import ru.netology.web.data.DataHelper;
 
-import static com.codeborne.selenide.Condition.visible;
+import java.time.Duration;
+
+import static com.codeborne.selenide.Condition.*;
+import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.*;
 
 public class MoneyTransferPage {
-    private SelenideElement sumField = $("div[data-test-id=amount] input");
-    private SelenideElement accountField = $("span[data-test-id=from] input");
-    private SelenideElement button = $("button[data-test-id=action-transfer]");
-    private SelenideElement errorNotification = $("[data-test-id=error-notification]");
+    private SelenideElement amountInput = $("div[data-test-id=amount] input");
+    private SelenideElement fromInput = $("span[data-test-id=from] input");
+    private SelenideElement transferButton = $("button[data-test-id=action-transfer]");
+    private SelenideElement transferHead = $(byText("[Пополнение карты]"));
+    private SelenideElement errorMessage = $("[data-test-id=error-message]");
 
-    public DashboardPage decision(String sum, String cardNum) {
-        sumField.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
-        sumField.setValue(sum);
-        accountField.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
-        accountField.setValue(cardNum);
-        button.click();
-        errorNotification.shouldBe(visible);
+    public MoneyTransferPage() {
+        transferHead.shouldBe(visible);
+    }
+
+    public DashboardPage makeValidTransfer(String amountToTransfer, DataHelper.CardInfo cardInfo) {
+        makeTransfer(amountToTransfer, cardInfo);
         return new DashboardPage();
+    }
+    public void makeTransfer(String amountToTransfer, DataHelper.CardInfo cardInfo) {
+        amountInput.setValue(amountToTransfer);
+        fromInput.setValue(cardInfo.getCardNumber());
+        transferButton.click();
+    }
+
+    public void findErrorMessage(String expectedText) {
+        errorMessage.shouldHave(exactText(expectedText), Duration.ofSeconds(15)).shouldBe(visible);
     }
 }
