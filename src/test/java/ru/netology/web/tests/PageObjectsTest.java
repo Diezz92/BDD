@@ -33,9 +33,9 @@ public class PageObjectsTest {
     @DisplayName("Перевод денег с первой карты на вторую")
     void shouldTransferMoneyFromFirstToSecondCard() {
         sum = 100;
-        var MoneyTransferPage = dashboardPage.clickButton(dashboardPage.card2);
+        var MoneyTransferPage = dashboardPage.clickButton2(dashboardPage.card2);
         var cardNum = DataHelper.getFirstCard().getCardNumber();
-        var dashboardPage2 = MoneyTransferPage.successfulTopUp(Integer.toString(sum), cardNum);
+        var dashboardPage2 = MoneyTransferPage.decision(Integer.toString(sum), cardNum);
         endBalance1 = dashboardPage2.extractBalance((dashboardPage2.card1));
         endBalance2 = dashboardPage2.extractBalance((dashboardPage2.card2));
         assertEquals(Balance1 - sum, endBalance1);
@@ -46,9 +46,9 @@ public class PageObjectsTest {
     @DisplayName("Перевод денег сo второй карты на первую")
     void shouldTransferMoneyFromSecondToFirstCard() {
         sum = 100;
-        var MoneyTransferPage = dashboardPage.clickButton(dashboardPage.card1);
+        var MoneyTransferPage = dashboardPage.clickButton1(dashboardPage.card1);
         var cardNum = DataHelper.getSecondCard().getCardNumber();
-        var dashboardPage2 = MoneyTransferPage.successfulTopUp(Integer.toString(sum), cardNum);
+        var dashboardPage2 = MoneyTransferPage.decision(Integer.toString(sum), cardNum);
         endBalance1 = dashboardPage2.extractBalance((dashboardPage2.card1));
         endBalance2 = dashboardPage2.extractBalance((dashboardPage2.card2));
         assertEquals(Balance1 + sum, endBalance1);
@@ -59,13 +59,13 @@ public class PageObjectsTest {
     @DisplayName("Не должен переводить больше, чем есть на карте")
     void shouldNotTransferMoreThanAvailable() {
         sum = Balance1 + 100;
-        var MoneyTransferPage = dashboardPage.clickButton(dashboardPage.card2);
+        var MoneyTransferPage = dashboardPage.clickButton2(dashboardPage.card2);
         var cardNum = DataHelper.getFirstCard().getCardNumber();
-        var dashboardPage2 = MoneyTransferPage.unsuccessfulTopUp(Integer.toString(sum), cardNum);
+        var dashboardPage2 = MoneyTransferPage.decision(Integer.toString(sum), cardNum);
         endBalance1 = dashboardPage2.extractBalance((dashboardPage2.card1));
         endBalance2 = dashboardPage2.extractBalance((dashboardPage2.card2));
-        assertEquals(Balance1 - sum, endBalance1);
-        assertEquals(Balance2 + sum, endBalance2);
+        assertEquals(Balance1 + sum, endBalance1);
+        assertEquals(Balance2 - sum, endBalance2);
     }
 }
 
