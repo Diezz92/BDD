@@ -35,11 +35,11 @@ public class DataHelper {
     }
 
     public static CardInfo getFirstCard() {
-        return new CardInfo("5559000000000001", "div[data-test-id='92df3f1c-a033-48e6-8390-206f6b1f56c0']");
+        return new CardInfo("5559000000000001", "92df3f1c-a033-48e6-8390-206f6b1f56c0");
     }
 
     public static CardInfo getSecondCard() {
-        return new CardInfo("5559000000000002", "div[data-test-id='0f3f5c2a-249e-4c3d-8287-09f7a039391d']");
+        return new CardInfo("5559000000000002", "0f3f5c2a-249e-4c3d-8287-09f7a039391d");
     }
 
     public static int generateValidAmount(int balance) {

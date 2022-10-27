@@ -13,8 +13,8 @@ public class MoneyTransferPage {
     private SelenideElement amountInput = $("div[data-test-id=amount] input");
     private SelenideElement fromInput = $("span[data-test-id=from] input");
     private SelenideElement transferButton = $("button[data-test-id=action-transfer]");
-    private SelenideElement transferHead = $(byText("[Пополнение карты]"));
-    private SelenideElement errorMessage = $("[data-test-id=error-message]");
+    private SelenideElement transferHead = $(byText("Пополнение карты"));
+    private SelenideElement errorMessage = $("data-test-id=error-message");
 
     public MoneyTransferPage() {
         transferHead.shouldBe(visible);
